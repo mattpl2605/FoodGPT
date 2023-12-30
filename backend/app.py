@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify
 import csv
 import openai
+import io
 
 app = Flask(__name__)
 
@@ -63,6 +64,11 @@ def calculate():
         'Macros': macros
     })
 
+def write_csv(csv_content, filename):
+    with open(filename, 'w', newline='') as file:
+        writer = csv.writer(file)
+        for row in csv_content:
+            writer.writerow(row)
 
 def generate_meal_plan(bmr, tdee, macros, preferences, allergies):
     openai.api_key = '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'
@@ -88,10 +94,34 @@ def generate_meal_plan(bmr, tdee, macros, preferences, allergies):
         max_tokens=2000
     )
 
+    csv_content = response['choices'][0]['message']['content']
+
+    csv_reader = csv.reader(io.StringIO(csv_content))
+    parsed_csv = list(csv_reader)
+
+    write_csv(parsed_csv, 'meal_plan.csv')
+
+    return 'Meal plan generated successfully'
+
+def generate_recipe(food_item, quantity):
+    prompt = f"""
+        I want you to act as my personal chef. 
+        I will tell you about a meal with its quantities, and you will tell me the exact recipe for me to cook it.
+        You should only reply with the recipe, and nothing else. The recipe should include the exact ingredients needed and a numbered list of steps to follow. 
+        Do not write explanations. My first request is {food_item}. Quantity: {quantity}
+        """
+
+    response = openai.ChatCompletion.create(
+        model="gpt-3.5-turbo",
+        messages=[{"role": "user", "content": prompt}],
+        max_tokens=2000
+    )
+
     return response['choices'][0]['message']['content']
 
-@app.route('/generate-meal-plan', methods=['POST'])
-def meal_plan():
+
+@app.route('/generate-meal-plan-and-recipes', methods=['POST'])
+def meal_plan_and_recipes():
     data = request.json
     try:
         bmr = calculate_bmr(data['weight'], data['height'], data['age'], data['gender'])
@@ -101,10 +131,20 @@ def meal_plan():
         allergies = data.get('allergies', '')
 
         meal_plan = generate_meal_plan(bmr, tdee, macros, preferences, allergies)
+
+        with open('meal_plan.csv', 'r') as file:
+            reader = csv.reader(file)
+            next(reader)
+            recipes = {}
+            for row in reader:
+                food_item = row[3]
+                quantity = row[4]
+                if food_item and food_item not in recipes:
+                    recipes[food_item] = generate_recipe(food_item, quantity)
     except (ValueError, TypeError, KeyError) as e:
         return jsonify({'error': str(e)}), 400
 
-    return jsonify({'meal_plan': meal_plan})
+    return jsonify({'meal_plan': meal_plan, 'recipes': recipes})
 
 if __name__ == '__main__':
     app.run(debug=True)

@@ -1,22 +1,22 @@
 Day,Meal,Calories,Food,Quantity,Carbs,Fats,Protein
-Monday,Breakfast,400,Omelette,1 serving,2g,30g,20g
-Monday,Lunch,600,Roasted chicken breast,1 serving,0g,15g,30g
-Monday,Dinner,500,Salmon with vegetables,1 serving,10g,20g,30g
-Tuesday,Breakfast,400,Avocado toast,1 serving,30g,20g,5g
-Tuesday,Lunch,600,Grilled chicken salad,1 serving,20g,10g,40g
-Tuesday,Dinner,500,Beef stir-fry with broccoli,1 serving,15g,15g,35g
-Wednesday,Breakfast,400,Greek yogurt with berries,1 serving,30g,5g,20g
-Wednesday,Lunch,600,Turkey lettuce wraps,1 serving,10g,10g,40g
-Wednesday,Dinner,500,Baked cod with quinoa,1 serving,30g,10g,30g
-Thursday,Breakfast,400,Chia seed pudding,1 serving,30g,15g,10g
-Thursday,Lunch,600,Shrimp and vegetable stir-fry,1 serving,20g,10g,35g
-Thursday,Dinner,500,Tofu with mixed vegetables,1 serving,20g,15g,25g
-Friday,Breakfast,400,Scrambled eggs with spinach,1 serving,5g,25g,20g
-Friday,Lunch,600,Grilled salmon with asparagus,1 serving,5g,25g,40g
-Friday,Dinner,500,Chicken and vegetable skewers,1 serving,15g,20g,30g
-Saturday,Breakfast,400,Banana protein pancakes,1 serving,35g,10g,25g
-Saturday,Lunch,600,Quinoa salad with grilled chicken,1 serving,30g,15g,30g
-Saturday,Dinner,500,Beef and broccoli stir-fry,1 serving,15g,20g,35g
-Sunday,Breakfast,400,Smoothie bowl,1 serving,40g,15g,10g
-Sunday,Lunch,600,Turkey and vegetable stir-fry,1 serving,15g,10g,40g
-Sunday,Dinner,500,Baked chicken thighs with roasted vegetables,1 serving,10g,20g,30g
+Monday,Breakfast,450,Omelette,2 eggs,2g,13g,11g
+Monday,Lunch,600,Grilled Chicken Salad,200g chicken,4g,14g,36g
+Monday,Dinner,800,Salmon with Roasted Vegetables,150g salmon,7g,18g,33g
+Tuesday,Breakfast,450,Avocado Toast,1 slice bread,23g,12g,7g
+Tuesday,Lunch,600,Turkey Wrap,200g turkey,8g,14g,32g
+Tuesday,Dinner,800,Quinoa Stir-Fry,150g quinoa,30g,13g,8g
+Wednesday,Breakfast,450,Greek Yogurt Parfait,200g yogurt,20g,7g,16g
+Wednesday,Lunch,600,Shrimp and Asparagus Stir-Fry,200g shrimp,8g,14g,32g
+Wednesday,Dinner,800,Baked Chicken with Sweet Potato,150g chicken,24g,6g,36g
+Thursday,Breakfast,450,Banana Pancakes,2 pancakes,52g,4g,9g
+Thursday,Lunch,600,Beef Stir-Fry,200g beef,8g,14g,32g
+Thursday,Dinner,800,Tofu and Vegetable Curry,150g tofu,18g,16g,13g
+Friday,Breakfast,450,Berry Smoothie,1 cup berries,22g,2g,1g
+Friday,Lunch,600,Spinach Salad with Tuna,200g tuna,8g,14g,32g
+Friday,Dinner,800,Stuffed Bell Peppers,150g ground beef,15g,16g,12g
+Saturday,Breakfast,450,Oatmeal with Almond Butter,1 cup oatmeal,54g,11g,10g
+Saturday,Lunch,600,Chicken Caesar Salad,200g chicken,4g,14g,36g
+Saturday,Dinner,800,Baked Cod with Quinoa,150g cod,11g,4g,34g
+Sunday,Breakfast,450,Peanut Butter Banana Toast,1 slice bread,23g,12g,7g
+Sunday,Lunch,600,Grilled Steak with Vegetables,200g steak,8g,14g,32g
+Sunday,Dinner,800,Vegetable Stir-Fry with Tofu,150g tofu,24g,10g,21g

@@ -1,0 +1,29 @@
+Day,Meal,Calories,Food,Quantity,Carbs,Fats,Protein
+Monday,Breakfast,400,Oatmeal,50g,33g,7g,6g
+Monday,Lunch,600,Vegetable Stir-Fry,1 serving,45g,15g,12g
+Monday,Snack,200,Greek Yogurt,150g,10g,2g,20g
+Monday,Dinner,800,Chickpea Curry,1 serving,70g,25g,30g
+Tuesday,Breakfast,400,Smoothie Bowl,1 serving,30g,10g,15g
+Tuesday,Lunch,600,Tofu Salad,1 serving,40g,20g,25g
+Tuesday,Snack,200,Fruit Salad,1 serving,50g,5g,1g
+Tuesday,Dinner,800,Vegetable Pasta,1 serving,75g,15g,20g
+Wednesday,Breakfast,400,Yogurt Parfait,1 serving,35g,10g,15g
+Wednesday,Lunch,600,Quinoa Salad,1 serving,50g,15g,20g
+Wednesday,Snack,200,Protein Bar,1 bar,20g,6g,12g
+Wednesday,Dinner,800,Bean Burrito,1 serving,55g,20g,30g
+Thursday,Breakfast,400,Avocado Toast,2 slices,30g,14g,10g
+Thursday,Lunch,600,Garden Salad,1 serving,40g,10g,15g
+Thursday,Snack,200,Vegetable Sticks with Hummus,1 serving,20g,8g,4g
+Thursday,Dinner,800,Vegetable Stir-Fry,1 serving,45g,15g,12g
+Friday,Breakfast,400,Pancakes,2 pancakes,40g,10g,8g
+Friday,Lunch,600,Lentil Soup,1 serving,40g,10g,20g
+Friday,Snack,200,Cottage Cheese,150g,5g,2g,15g
+Friday,Dinner,800,Tofu Stir-Fry,1 serving,55g,15g,25g
+Saturday,Breakfast,400,Scrambled Eggs,2 eggs,2g,10g,12g
+Saturday,Lunch,600,Greek Salad,1 serving,30g,20g,15g
+Saturday,Snack,200,Smoothie,1 serving,20g,5g,10g
+Saturday,Dinner,800,Chickpea Curry,1 serving,70g,25g,30g
+Sunday,Breakfast,400,Oatmeal,50g,33g,7g,6g
+Sunday,Lunch,600,Tofu Salad,1 serving,40g,20g,25g
+Sunday,Snack,200,Fruit Salad,1 serving,50g,5g,1g
+Sunday,Dinner,800,Vegetable Pasta,1 serving,75g,15g,20g

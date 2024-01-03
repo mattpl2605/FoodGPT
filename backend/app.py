@@ -1,9 +1,11 @@
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 import csv
 import openai
 import io
 
 app = Flask(__name__)
+CORS(app)
 
 
 
@@ -44,9 +46,10 @@ def calculate_macros(tdee, goal):
 @app.route('/calculate', methods=['POST'])
 def calculate():
     data = request.json
-    weight = data.get('weight')
-    height = data.get('height')
-    age = data.get('age')
+    print("Received data:", data)
+    weight = float(data.get('weight'))
+    height = float(data.get('height'))
+    age = int(data.get('age'))
     gender = data.get('gender')
     activity_level = data.get('activity_level')
     goal = data.get('goal')
@@ -76,7 +79,7 @@ def generate_meal_plan(bmr, tdee, macros, preferences, allergies):
     # Prompt engineering
     prompt = (
         f"I want you to act as my personal nutritionist. I will tell you about my dietary preferences, allergies, my basal metabolic rate, total daily energy expenditure, and macro split, and you will suggest a one-week meal plan specifying food of each day for me to try that will cause me to reach my target and satisfy my calories. You should only reply with the meal plan you recommend, including the quantities and the nutritional facts of each meal, and nothing else.\n\n"
-        f"The meal plan should be output in the format of a csv. In the table you must output the following columns with the same exact names without any modifications: Day, Meal, Calories, Food, Quantity, Carbs, Fats, Protein. Make sure to provide the meal plan for the whole week and not just one day. Don't return any row with empty values.\n\n"
+        f"The meal plan should be output in the format of a csv. In the table you must output the following columns with the same exact names without any modifications: Day, Meal, Calories, Food, Quantity, Carbs, Fats, Protein. Make sure to provide the meal plan for the whole week and not just one day. Don't return any row with empty values. If a user has a {preferences} or {allergies}, you must give a meal plan with all the food that do not contain the {allergies} and all the food must contain the {preferences} the user has or else it could be a health hazard for the user. \n\n"
         f"Here are some constraints and penalties for this task:\n\n"
         f"- If the total calories for any day are too high or too low according to the criteria based on the person's input goal then deduct 10 points from your final score.\n"
         f"- If any row has empty values then deduct 5 points from your final score.\n"
@@ -94,14 +97,7 @@ def generate_meal_plan(bmr, tdee, macros, preferences, allergies):
         max_tokens=2000
     )
 
-    csv_content = response['choices'][0]['message']['content']
-
-    csv_reader = csv.reader(io.StringIO(csv_content))
-    parsed_csv = list(csv_reader)
-
-    write_csv(parsed_csv, 'meal_plan.csv')
-
-    return 'Meal plan generated successfully'
+    return response['choices'][0]['message']['content']
 
 def generate_recipe(food_item, quantity):
     prompt = f"""
@@ -124,23 +120,26 @@ def generate_recipe(food_item, quantity):
 def meal_plan_and_recipes():
     data = request.json
     try:
-        bmr = calculate_bmr(data['weight'], data['height'], data['age'], data['gender'])
-        tdee = calculate_tdee(bmr, data['activity_level'])
-        macros = calculate_macros(tdee, data['goal'])
+        bmr = calculate_bmr(float(data.get('weight')), float(data.get('height')), int(data.get('age')), data.get('gender'))
+        tdee = calculate_tdee(bmr, data.get('activity_level'))
+        macros = calculate_macros(tdee, data.get('goal'))
         preferences = data.get('preferences', '')
         allergies = data.get('allergies', '')
 
         meal_plan = generate_meal_plan(bmr, tdee, macros, preferences, allergies)
 
-        with open('meal_plan.csv', 'r') as file:
-            reader = csv.reader(file)
-            next(reader)
-            recipes = {}
-            for row in reader:
-                food_item = row[3]
-                quantity = row[4]
-                if food_item and food_item not in recipes:
-                    recipes[food_item] = generate_recipe(food_item, quantity)
+        csv_reader = csv.reader(io.StringIO(meal_plan))
+        parsed_csv = list(csv_reader)
+
+        recipes = {}
+        for row in parsed_csv[1:]:
+            if len(row) < 5:
+                print(f"Skipping incomplete row: {row}")
+                continue
+            food_item = row[3]
+            quantity = row[4]
+            if food_item and food_item not in recipes:
+                recipes[food_item] = generate_recipe(food_item, quantity)
     except (ValueError, TypeError, KeyError) as e:
         return jsonify({'error': str(e)}), 400
 

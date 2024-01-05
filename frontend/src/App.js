@@ -1,18 +1,19 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
+import Login from './components/Login'; // Make sure the path to Login.js is correct
 import FitnessCalculator from './components/FitnessCalculator';
-import ResultsScreen from './components/ResultsScreen'; // Adjust the path as needed
+import ResultsScreen from './components/ResultsScreen';
 import ResponsiveAppBar from './components/ResponsiveAppBar.js';
 
 // Create a theme instance.
 const theme = createTheme({
   palette: {
     primary: {
-      main: '#ff0000', // Replace this with your preferred color
+      main: '#ff0000',
     },
     background: {
-      default: '#ffffff', // Assuming a white background for the content area
+      default: '#ffffff',
     },
   },
   components: {
@@ -25,7 +26,7 @@ const theme = createTheme({
     MuiButton: {
       styleOverrides: {
         root: {
-          margin: '8px', // Example to add margin
+          margin: '8px',
         },
       },
     },
@@ -37,11 +38,12 @@ function App() {
     <ThemeProvider theme={theme}>
       <div className="App">
         <Router>
-          <ResponsiveAppBar /> {/* Include the AppBar */}
+          <ResponsiveAppBar />
           <Routes>
-            <Route exact path="/" element={<FitnessCalculator />} />
+            <Route exact path="/" element={<Login />} />
+            <Route path="/fitness-calculator" element={<FitnessCalculator />} />
             <Route path="/results" element={<ResultsScreen />} />
-            {/* Additional routes here if needed */}
+            {/* Add more routes as needed */}
           </Routes>
         </Router>
       </div>

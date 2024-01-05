@@ -1,23 +1,25 @@
-// RecipeDetailsComponent.js
 import React from 'react';
 import { Card, CardContent, Typography, List, ListItem } from '@mui/material';
 
 const RecipeDetailsComponent = ({ title, details }) => {
-  const parseSection = (sectionTitle) => {
-    const startIndex = details.indexOf(sectionTitle);
-    if (startIndex === -1) {
-      return [];
+  const parseSection = (sectionTitles, removeNumbering = false) => {
+    for (let sectionTitle of sectionTitles) {
+      const sectionStart = details.indexOf(sectionTitle);
+      if (sectionStart !== -1) {
+        const sectionEnd = details.indexOf('\n\n', sectionStart);
+        let sectionContent = sectionEnd === -1 ? details.substring(sectionStart) : details.substring(sectionStart, sectionEnd);
+
+        sectionContent = sectionContent.replace(sectionTitle, '').trim().split('\n');
+        return sectionContent.map(line => {
+          return removeNumbering ? line.trim().replace(/^\d+\.\s*/, '') : line.trim();
+        }).filter(line => line.length > 0);
+      }
     }
-    const endIndex = details.indexOf('\n\n', startIndex);
-    const sectionContent = endIndex === -1 ? details.slice(startIndex) : details.slice(startIndex, endIndex);
-    return sectionContent
-      .split('\n')
-      .slice(1) // Remove the section title
-      .map(line => line.trim().replace(/^\d+\.\s*/, '')); // Remove numbering
+    return [];
   };
 
-  const ingredients = parseSection('Ingredients:');
-  const steps = parseSection('Steps:');
+  const ingredients = parseSection(['Ingredients:\n'], true); // Remove numbering from ingredients
+  const steps = parseSection(['Steps:\n', 'Recipe:\n', 'Instructions:\n']); // Keep numbering for steps
 
   return (
     <Card sx={{ marginBottom: 2 }}>
@@ -43,7 +45,7 @@ const RecipeDetailsComponent = ({ title, details }) => {
             <List dense>
               {steps.map((step, index) => (
                 <ListItem key={index}>
-                  <Typography variant="body2">{`${index + 1}. ${step}`}</Typography>
+                  <Typography variant="body2">{step}</Typography>
                 </ListItem>
               ))}
             </List>

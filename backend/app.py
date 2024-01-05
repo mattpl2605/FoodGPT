@@ -1,12 +1,17 @@
+import firebase_admin
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import csv
 import openai
 import io
+from firebase_admin import credentials, firestore, auth
 
 app = Flask(__name__)
 CORS(app)
 
+cred = credentials.Certificate('/Users/bilbaothanos14/Documents/GitHub/FoodGPT/backend/foodgpt-20eff-firebase-adminsdk-33q1u-f6dac8684e.json')
+firebase_admin.initialize_app(cred)
+db = firestore.client()
 
 
 def calculate_bmr(weight, height, age, gender):
@@ -45,19 +50,36 @@ def calculate_macros(tdee, goal):
 
 @app.route('/calculate', methods=['POST'])
 def calculate():
-    data = request.json
-    print("Received data:", data)
-    weight = float(data.get('weight'))
-    height = float(data.get('height'))
-    age = int(data.get('age'))
-    gender = data.get('gender')
-    activity_level = data.get('activity_level')
-    goal = data.get('goal')
-
+    id_token = request.headers.get('Authorization')
     try:
+        decoded_token = auth.verify_id_token(id_token)
+        uid = decoded_token['uid']
+    except auth.AuthError:
+        return jsonify({'error': 'Authentication error'}), 401
+
+    data = request.json
+    try:
+
+        print("Received data:", data)
+        weight = float(data.get('weight'))
+        height = float(data.get('height'))
+        age = int(data.get('age'))
+        gender = data.get('gender')
+        activity_level = data.get('activity_level')
+        goal = data.get('goal')
+
         bmr = calculate_bmr(weight, height, age, gender)
         tdee = calculate_tdee(bmr, activity_level)
         macros = calculate_macros(tdee, goal)
+
+        user_ref = db.collection('users').document(uid)
+        user_ref.set({
+            'calculations': {
+                'BMR': bmr,
+                'TDEE': tdee,
+                'Macros': macros
+            }
+        }, merge=True)
     except (ValueError, TypeError) as e:
         return jsonify({'error': str(e)}), 400
 
@@ -118,6 +140,12 @@ def generate_recipe(food_item, quantity):
 
 @app.route('/generate-meal-plan-and-recipes', methods=['POST'])
 def meal_plan_and_recipes():
+    id_token = request.headers.get('Authorization')
+    try:
+        decoded_token = auth.verify_id_token(id_token)
+        uid = decoded_token['uid']
+    except auth.AuthError:
+        return jsonify({'error': 'Authentication error'}), 401
     data = request.json
     try:
         bmr = calculate_bmr(float(data.get('weight')), float(data.get('height')), int(data.get('age')), data.get('gender'))
@@ -140,10 +168,65 @@ def meal_plan_and_recipes():
             quantity = row[4]
             if food_item and food_item not in recipes:
                 recipes[food_item] = generate_recipe(food_item, quantity)
+
+        user_ref = db.collection('users').document(uid)
+        user_ref.set({
+            'meal_plan': meal_plan,
+            'recipes': recipes
+        }, merge=True)
     except (ValueError, TypeError, KeyError) as e:
         return jsonify({'error': str(e)}), 400
 
     return jsonify({'meal_plan': meal_plan, 'recipes': recipes})
+
+@app.route('/get-past-calculations', methods=['GET'])
+def get_past_calculations():
+    id_token = request.headers.get('Authorization')
+    try:
+        decoded_token = auth.verify_id_token(id_token)
+        uid = decoded_token['uid']
+    except auth.AuthError:
+        return jsonify({'error': 'Authentication error'}), 401
+
+    try:
+        user_ref = db.collection('users').document(uid)
+        user_doc = user_ref.get()
+        if user_doc.exists:
+            user_data = user_doc.to_dict()
+            past_calculations = user_data.get('calculations', {})
+            return jsonify(past_calculations)
+        else:
+            return jsonify({'error': 'User data not found'}), 404
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/get-past-meal-plans-and-recipes', methods=['GET'])
+def get_past_meal_plans_and_recipes():
+    id_token = request.headers.get('Authorization')
+    try:
+        decoded_token = auth.verify_id_token(id_token)
+        uid = decoded_token['uid']
+    except auth.AuthError:
+        return jsonify({'error': 'Authentication error'}), 401
+
+    try:
+        user_ref = db.collection('users').document(uid)
+        user_doc = user_ref.get()
+        if user_doc.exists:
+            user_data = user_doc.to_dict()
+            past_meal_plan = user_data.get('meal_plan', 'No meal plan found')
+            past_recipes = user_data.get('recipes', 'No recipes found')
+            return jsonify({
+                'meal_plan': past_meal_plan,
+                'recipes': past_recipes
+            })
+        else:
+            return jsonify({'error': 'User data not found'}), 404
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+
 
 if __name__ == '__main__':
     app.run(debug=True)

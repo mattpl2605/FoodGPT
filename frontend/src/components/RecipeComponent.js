@@ -1,22 +1,27 @@
+// RecipeComponent.js
 import React from 'react';
-import { List, ListItem, ListItemText, Typography } from '@mui/material';
+import { Typography, Container } from '@mui/material';
+import RecipeDetailsComponent from './RecipeDetailsComponent'; // Make sure to import the component
 
 const RecipeComponent = ({ recipes }) => {
   if (!recipes) {
-    return <Typography variant="h6">No recipes available</Typography>;
+    return (
+      <Container maxWidth="sm">
+        <Typography variant="h6">No recipes available</Typography>
+      </Container>
+    );
   }
 
   return (
-    <List>
+    <Container maxWidth="sm" sx={{ mt: 4, mb: 4 }}>
       {Object.entries(recipes).map(([recipeName, recipeDetails], index) => (
-        <ListItem key={index} alignItems="flex-start">
-          <ListItemText
-            primary={recipeName}
-            secondary={<Typography component="span" variant="body2" color="textPrimary">{recipeDetails}</Typography>}
-          />
-        </ListItem>
+        <RecipeDetailsComponent
+          key={index}
+          title={recipeName}
+          details={recipeDetails}
+        />
       ))}
-    </List>
+    </Container>
   );
 };
 

@@ -1,21 +1,37 @@
 import React from 'react';
-import { Box, Typography } from '@mui/material';
+import { Container, Typography, Box } from '@mui/material';
 
 const TDEEContainer = ({ data }) => {
-  if (!data) return <Typography>No data available</Typography>;
+  if (!data) return (
+    <Container maxWidth="sm">
+      <Typography>No data available</Typography>
+    </Container>
+  );
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 2, border: '1px solid grey', borderRadius: '8px', padding: 2 }}>
-      <Typography variant="h6">Your TDEE Information:</Typography>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-        <Typography variant="body1">BMR:</Typography>
-        <Typography variant="body1">{data.BMR} kcal/day</Typography>
+    <Container maxWidth="sm" sx={{ mt: 4, mb: 4 }}>
+      <Box sx={{
+        bgcolor: 'background.default',
+        p: 4,
+        borderRadius: '8px',
+        boxShadow: 1,
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 2,
+      }}>
+        <Typography variant="h6" component="div" sx={{ textAlign: 'center', mb: 2, fontWeight: 'bold' }}>
+          Your Caloric Information
+        </Typography>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+          <Typography variant="body1">BMR:</Typography>
+          <Typography variant="body1">{data.BMR} cal/day</Typography>
+        </Box>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
+          <Typography variant="body1">TDEE:</Typography>
+          <Typography variant="body1">{data.TDEE} cal/day</Typography>
+        </Box>
       </Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-        <Typography variant="body1">TDEE:</Typography>
-        <Typography variant="body1">{data.TDEE} kcal/day</Typography>
-      </Box>
-    </Box>
+    </Container>
   );
 };
 

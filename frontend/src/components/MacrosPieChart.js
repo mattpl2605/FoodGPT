@@ -1,46 +1,52 @@
 import React from 'react';
 import { PieChart } from 'react-minimal-pie-chart';
+import { Container, Typography, Box } from '@mui/material';
 
 const MacrosPieChart = ({ macros }) => {
   if (!macros || !macros.protein_grams || !macros.carbs_grams || !macros.fat_grams) {
-    return <p>No macros data available</p>;
+    return (
+      <Container maxWidth="sm">
+        <Typography>No macros data available</Typography>
+      </Container>
+    );
   }
 
-  // Sum up the total grams of all macros
-  const totalGrams = macros.protein_grams + macros.carbs_grams + macros.fat_grams;
-
-  // Check if totalGrams is zero to avoid division by zero
-  if (totalGrams === 0) {
-    return <p>Macro data is not sufficient for charting</p>;
-  }
-
-  // Calculate the percentages
-  const proteinPercentage = (macros.protein_grams / totalGrams) * 100;
-  const carbsPercentage = (macros.carbs_grams / totalGrams) * 100;
-  const fatPercentage = (macros.fat_grams / totalGrams) * 100;
-
-  // Prepare data for the pie chart
   const pieChartData = [
-    { title: 'Protein', value: proteinPercentage, color: '#E38627' },
-    { title: 'Carbs', value: carbsPercentage, color: '#C13C37' },
-    { title: 'Fat', value: fatPercentage, color: '#6A2135' },
+    { title: 'Protein', value: macros.protein_grams, color: '#E38627' },
+    { title: 'Carbs', value: macros.carbs_grams, color: '#C13C37' },
+    { title: 'Fat', value: macros.fat_grams, color: '#6A2135' },
   ];
 
   return (
-    <div>
-      <h3>Macros Distribution</h3>
-      <PieChart
-        data={pieChartData}
-        label={({ dataEntry }) => `${Math.round(dataEntry.percentage)} %`}
-        labelStyle={(index) => ({
-          fill: pieChartData[index].color,
-          fontSize: '5px',
-          fontFamily: 'sans-serif',
-        })}
-        radius={42}
-        labelPosition={112}
-      />
-    </div>
+    <Container maxWidth="sm" sx={{ mt: 4, mb: 4 }}>
+      <Box sx={{
+        bgcolor: 'background.default',
+        p: 4,
+        borderRadius: '8px',
+        boxShadow: 1,
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 2,
+      }}>
+        <Typography variant="h6" component="div" sx={{ textAlign: 'center', fontWeight: 'bold', mb: 2 }}>
+          Your Macro Split
+        </Typography>
+        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', mt: 2 }}>
+          <PieChart
+            data={pieChartData}
+            label={({ dataEntry }) => `${dataEntry.title}: ${dataEntry.value.toFixed(1)}g`}
+            labelStyle={(index) => ({
+              fill: pieChartData[index].color,
+              fontSize: '8px',
+              fontFamily: 'sans-serif',
+            })}
+            radius={42}
+            labelPosition={112}
+            style={{ height: '200px' }}
+          />
+        </Box>
+      </Box>
+    </Container>
   );
 };
 

@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import FitnessCalculator from './components/FitnessCalculator';
 import ResultsScreen from './components/ResultsScreen'; // Adjust the path as needed
+import ResponsiveAppBar from './components/ResponsiveAppBar.js';
 
 // Create a theme instance.
 const theme = createTheme({
@@ -36,10 +37,11 @@ function App() {
     <ThemeProvider theme={theme}>
       <div className="App">
         <Router>
+          <ResponsiveAppBar /> {/* Include the AppBar */}
           <Routes>
             <Route exact path="/" element={<FitnessCalculator />} />
             <Route path="/results" element={<ResultsScreen />} />
-            {/* You can add more routes here if needed */}
+            {/* Additional routes here if needed */}
           </Routes>
         </Router>
       </div>

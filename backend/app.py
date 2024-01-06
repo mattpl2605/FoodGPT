@@ -5,6 +5,7 @@ import csv
 import openai
 import io
 from firebase_admin import credentials, firestore, auth
+import logging
 
 app = Flask(__name__)
 CORS(app, supports_credentials=True)
@@ -138,6 +139,7 @@ def generate_recipe(food_item, quantity):
 
 
 @app.route('/generate-meal-plan-and-recipes', methods=['POST'])
+@cross_origin(origin='localhost', headers=['Content-Type', 'Authorization'])
 def meal_plan_and_recipes():
     id_token = request.headers.get('Authorization')
     try:
@@ -182,36 +184,31 @@ def meal_plan_and_recipes():
 
 @app.route('/get-past-calculations', methods=['GET'])
 def get_past_calculations():
-    id_token = request.headers.get('Authorization')
     try:
+        id_token = request.headers.get('Authorization').split('Bearer ')[1]
         decoded_token = auth.verify_id_token(id_token)
         uid = decoded_token['uid']
-    except auth.AuthError:
-        return jsonify({'error': 'Authentication error'}), 401
-
-    try:
         calculations_collection = db.collection('users').document(uid).collection('calculations')
         calculations_docs = calculations_collection.stream()
         past_calculations = [doc.to_dict() for doc in calculations_docs]
         return jsonify(past_calculations)
     except Exception as e:
+        logging.exception("Error fetching past calculations")
         return jsonify({'error': str(e)}), 500
 
 @app.route('/get-past-meal-plans-and-recipes', methods=['GET'])
 def get_past_meal_plans_and_recipes():
-    id_token = request.headers.get('Authorization')
-    try:
-        decoded_token = auth.verify_id_token(id_token)
-        uid = decoded_token['uid']
-    except auth.AuthError:
-        return jsonify({'error': 'Authentication error'}), 401
 
     try:
+        id_token = request.headers.get('Authorization').split('Bearer ')[1]
+        decoded_token = auth.verify_id_token(id_token)
+        uid = decoded_token['uid']
         meal_plans_collection = db.collection('users').document(uid).collection('meal_plans')
         meal_plans_docs = meal_plans_collection.stream()
         past_meal_plans = [doc.to_dict() for doc in meal_plans_docs]
         return jsonify(past_meal_plans)
     except Exception as e:
+        logging.exception("Error fetching past meal plans and recipes")
         return jsonify({'error': str(e)}), 500
 
 

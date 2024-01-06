@@ -10,12 +10,20 @@ function Login() {
     const provider = new GoogleAuthProvider();
     
     signInWithPopup(auth, provider)
-      .then(result => {
-        // After successful login, navigate to the FitnessCalculator page
+      .then(async result => {
+        // Retrieve the ID token
+        const idToken = await result.user.getIdToken();
+        console.log(idToken)
+
+        // You can now use this ID token to authenticate requests to your backend
+        // Example: Send ID token to your backend via HTTPS
+
+        // After successful login and handling token, navigate to the FitnessCalculator page
         navigate('/fitness-calculator');
       })
       .catch(error => {
         console.error("Error signing in with Google:", error);
+        // Optionally, update the UI to reflect the error
       });
   };
 

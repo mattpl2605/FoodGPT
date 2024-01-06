@@ -1,9 +1,11 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { AppBar, Toolbar, Typography, IconButton, Menu, MenuItem, Container } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 
 function ResponsiveAppBar() {
   const [anchorElNav, setAnchorElNav] = React.useState(null);
+  const navigate = useNavigate();
 
   const handleOpenNavMenu = (event) => {
     setAnchorElNav(event.currentTarget);
@@ -11,6 +13,11 @@ function ResponsiveAppBar() {
 
   const handleCloseNavMenu = () => {
     setAnchorElNav(null);
+  };
+
+  const handleNavigate = (path) => {
+    navigate(path);
+    handleCloseNavMenu();
   };
 
   return (
@@ -22,6 +29,7 @@ function ResponsiveAppBar() {
             noWrap
             component="div"
             sx={{ flexGrow: 1, display: 'flex', color: 'inherit', textDecoration: 'none' }}
+            onClick={() => handleNavigate('/')}
           >
             FoodGPT
           </Typography>
@@ -51,13 +59,14 @@ function ResponsiveAppBar() {
             open={Boolean(anchorElNav)}
             onClose={handleCloseNavMenu}
           >
-            <MenuItem onClick={handleCloseNavMenu}>
+            <MenuItem onClick={() => handleNavigate('/fitness-calculator')}>
               <Typography textAlign="center">Create Meal Plan</Typography>
             </MenuItem>
-            <MenuItem onClick={handleCloseNavMenu}>
+            <MenuItem onClick={() => handleNavigate('/history')}>
               <Typography textAlign="center">History</Typography>
             </MenuItem>
             <MenuItem onClick={handleCloseNavMenu}>
+              {/* Log out logic here */}
               <Typography textAlign="center">Log Out</Typography>
             </MenuItem>
           </Menu>

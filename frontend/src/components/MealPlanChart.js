@@ -8,7 +8,7 @@ import {
   TableRow,
   Paper,
   Typography,
-  Container
+  Container,
 } from '@mui/material';
 import { parse } from 'papaparse';
 
@@ -23,7 +23,12 @@ const MealPlanChart = ({ mealPlanCSV }) => {
 
   // Parse the CSV data
   const parsedData = parse(mealPlanCSV, { header: true });
-  const meals = parsedData.data;
+  const meals = parsedData.data.map(meal => ({
+    ...meal,
+    Carbs: `${meal.Carbs}g`,
+    Fats: `${meal.Fats}g`,
+    Protein: `${meal.Protein}g`,
+  }));
 
   return (
     <Container maxWidth="sm" sx={{ mt: 4, mb: 4 }}>

@@ -183,6 +183,7 @@ def meal_plan_and_recipes():
     return jsonify({'meal_plan': meal_plan, 'recipes': recipes})
 
 @app.route('/get-past-calculations', methods=['GET'])
+@cross_origin(origin='localhost', headers=['Content-Type', 'Authorization'])
 def get_past_calculations():
     try:
         id_token = request.headers.get('Authorization').split('Bearer ')[1]
@@ -197,6 +198,7 @@ def get_past_calculations():
         return jsonify({'error': str(e)}), 500
 
 @app.route('/get-past-meal-plans-and-recipes', methods=['GET'])
+@cross_origin(origin='localhost', headers=['Content-Type', 'Authorization'])
 def get_past_meal_plans_and_recipes():
 
     try:
@@ -210,6 +212,36 @@ def get_past_meal_plans_and_recipes():
     except Exception as e:
         logging.exception("Error fetching past meal plans and recipes")
         return jsonify({'error': str(e)}), 500
+
+
+@app.route('/history/<requestId>', methods=['GET'])
+@cross_origin(origin='localhost', headers=['Content-Type', 'Authorization'])
+def get_history_details(requestId):
+    try:
+        auth_header = request.headers.get('Authorization')
+        if not auth_header or not auth_header.startswith('Bearer '):
+            return jsonify({'error': 'Authorization header missing or malformed'}), 401
+        id_token = auth_header.split('Bearer ')[1]
+        decoded_token = auth.verify_id_token(id_token)
+        uid = decoded_token['uid']
+
+        calculations_doc_ref = db.collection('users').document(uid).collection('calculations').document(requestId)
+        calculations_doc = calculations_doc_ref.get()
+        calculations_data = calculations_doc.to_dict() if calculations_doc.exists else {}
+
+        meal_plans_doc_ref = db.collection('users').document(uid).collection('meal_plans').document(requestId)
+        meal_plans_doc = meal_plans_doc_ref.get()
+        meal_plans_data = meal_plans_doc.to_dict() if meal_plans_doc.exists else {}
+
+        history_details = {
+            'calculations': calculations_data,
+            'meal_plans': meal_plans_data
+        }
+        return jsonify(history_details)
+    except Exception as e:
+        logging.exception("Error fetching history details")
+        return jsonify({'error': str(e)}), 500
+
 
 
 

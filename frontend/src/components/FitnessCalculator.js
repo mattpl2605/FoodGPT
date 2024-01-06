@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import { auth } from '../firebase/firebase'; // Importing auth from your firebase configuration
 import { Container, TextField, Radio, RadioGroup, FormControlLabel, FormLabel, Button, Box, Select, MenuItem, InputLabel, FormControl } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 
 const FitnessCalculator = () => {
-  // State for form inputs
   const [formData, setFormData] = useState({
     weight: '',
     height: '',
@@ -18,12 +18,49 @@ const FitnessCalculator = () => {
 
   const navigate = useNavigate();
 
-  // State to store the response data
   const [tdeeData, setTdeeData] = useState(null);
   const [mealPlanData, setMealPlanData] = useState(null);
 
+  const getIdToken = async () => {
+    if (auth.currentUser) {
+      return await auth.currentUser.getIdToken();
+    } else {
+      throw new Error('User not authenticated');
+    }
+  };
 
-  // Update form data as user inputs
+  const calculateTDEEAndMacros = async () => {
+    try {
+      const idToken = await getIdToken();
+      const response = await axios.post('http://127.0.0.1:5000/calculate', formData, {
+        headers: {
+          'Authorization': idToken,
+          'Content-Type': 'application/json'
+        }
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error in calculateTDEEAndMacros:', error);
+      return null;
+    }
+  };
+
+  const generateMealPlanAndRecipes = async () => {
+    try {
+      const idToken = await getIdToken();
+      const response = await axios.post('http://127.0.0.1:5000/generate-meal-plan-and-recipes', formData, {
+        headers: {
+          'Authorization': idToken,
+          'Content-Type': 'application/json'
+        }
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error in generateMealPlanAndRecipes:', error);
+      return null;
+    }
+  };
+
   const handleInputChange = (event) => {
     const { name, value } = event.target;
     setFormData(prevState => ({
@@ -31,29 +68,6 @@ const FitnessCalculator = () => {
       [name]: value
     }));
   };
-
-  const calculateTDEEAndMacros = async () => {
-    try {
-      const response = await axios.post('http://127.0.0.1:5000/calculate', formData);
-      console.log('Response from /calculate:', response.data);
-      return response.data; // Return the response data
-    } catch (error) {
-      console.error('Error in calculateTDEEAndMacros:', error);
-      return null; // Return null in case of error
-    }
-  };
-  
-  const generateMealPlanAndRecipes = async () => {
-    try {
-      const response = await axios.post('http://127.0.0.1:5000/generate-meal-plan-and-recipes', formData);
-      console.log('Response from /generate-meal-plan-and-recipes:', response.data);
-      return response.data; // Return the response data
-    } catch (error) {
-      console.error('Error in generateMealPlanAndRecipes:', error);
-      return null; // Return null in case of error
-    }
-  };
-  
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -71,8 +85,6 @@ const FitnessCalculator = () => {
       console.error("Failed to fetch data");
     }
   };
-  
-  
 
 
   return (

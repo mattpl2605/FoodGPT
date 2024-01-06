@@ -1,13 +1,13 @@
 import firebase_admin
 from flask import Flask, request, jsonify
-from flask_cors import CORS
+from flask_cors import CORS, cross_origin
 import csv
 import openai
 import io
 from firebase_admin import credentials, firestore, auth
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, supports_credentials=True)
 
 cred = credentials.Certificate('/Users/bilbaothanos14/Documents/GitHub/FoodGPT/backend/foodgpt-20eff-firebase-adminsdk-33q1u-f6dac8684e.json')
 firebase_admin.initialize_app(cred)
@@ -59,7 +59,6 @@ def calculate():
 
     data = request.json
     try:
-
         print("Received data:", data)
         weight = float(data.get('weight'))
         height = float(data.get('height'))
@@ -72,14 +71,14 @@ def calculate():
         tdee = calculate_tdee(bmr, activity_level)
         macros = calculate_macros(tdee, goal)
 
-        user_ref = db.collection('users').document(uid)
-        user_ref.set({
-            'calculations': {
-                'BMR': bmr,
-                'TDEE': tdee,
-                'Macros': macros
-            }
-        }, merge=True)
+        calculations_collection = db.collection('users').document(uid).collection('calculations')
+        new_calculation_doc = calculations_collection.document()
+        new_calculation_doc.set({
+            'BMR': bmr,
+            'TDEE': tdee,
+            'Macros': macros,
+            'timestamp': firestore.SERVER_TIMESTAMP
+        })
     except (ValueError, TypeError) as e:
         return jsonify({'error': str(e)}), 400
 
@@ -169,11 +168,13 @@ def meal_plan_and_recipes():
             if food_item and food_item not in recipes:
                 recipes[food_item] = generate_recipe(food_item, quantity)
 
-        user_ref = db.collection('users').document(uid)
-        user_ref.set({
+        meal_plans_collection = db.collection('users').document(uid).collection('meal_plans')
+        new_meal_plan_doc = meal_plans_collection.document()
+        new_meal_plan_doc.set({
             'meal_plan': meal_plan,
-            'recipes': recipes
-        }, merge=True)
+            'recipes': recipes,
+            'timestamp': firestore.SERVER_TIMESTAMP
+        })
     except (ValueError, TypeError, KeyError) as e:
         return jsonify({'error': str(e)}), 400
 
@@ -189,14 +190,10 @@ def get_past_calculations():
         return jsonify({'error': 'Authentication error'}), 401
 
     try:
-        user_ref = db.collection('users').document(uid)
-        user_doc = user_ref.get()
-        if user_doc.exists:
-            user_data = user_doc.to_dict()
-            past_calculations = user_data.get('calculations', {})
-            return jsonify(past_calculations)
-        else:
-            return jsonify({'error': 'User data not found'}), 404
+        calculations_collection = db.collection('users').document(uid).collection('calculations')
+        calculations_docs = calculations_collection.stream()
+        past_calculations = [doc.to_dict() for doc in calculations_docs]
+        return jsonify(past_calculations)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
@@ -210,18 +207,10 @@ def get_past_meal_plans_and_recipes():
         return jsonify({'error': 'Authentication error'}), 401
 
     try:
-        user_ref = db.collection('users').document(uid)
-        user_doc = user_ref.get()
-        if user_doc.exists:
-            user_data = user_doc.to_dict()
-            past_meal_plan = user_data.get('meal_plan', 'No meal plan found')
-            past_recipes = user_data.get('recipes', 'No recipes found')
-            return jsonify({
-                'meal_plan': past_meal_plan,
-                'recipes': past_recipes
-            })
-        else:
-            return jsonify({'error': 'User data not found'}), 404
+        meal_plans_collection = db.collection('users').document(uid).collection('meal_plans')
+        meal_plans_docs = meal_plans_collection.stream()
+        past_meal_plans = [doc.to_dict() for doc in meal_plans_docs]
+        return jsonify(past_meal_plans)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 

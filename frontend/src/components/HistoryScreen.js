@@ -37,6 +37,20 @@ const HistoryScreen = () => {
     navigate('/history-details', { state: { item } });
   };
 
+  const formatDateToLocalTimezone = (timestamp) => {
+    const date = new Date(timestamp);
+    return new Intl.DateTimeFormat('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: true,
+      timeZoneName: 'short'
+    }).format(date);
+  };
+
   if (loading) return <div>Loading...</div>;
   if (error) return <div>{error}</div>;
   if (!historyData) return <div>No history data found.</div>;
@@ -45,13 +59,13 @@ const HistoryScreen = () => {
     <Box sx={{ p: 2 }}>
       {historyData.calculations.map((calculation, index) => (
         <Box key={index} sx={{ mb: 2, p: 2, border: '1px solid grey', borderRadius: '4px' }}>
-          <Typography variant="h6">Calculation Timestamp: {calculation.timestamp}</Typography>
+          <Typography variant="h6">Calculation Timestamp: {formatDateToLocalTimezone(calculation.timestamp)}</Typography>
           <Button variant="contained" onClick={() => handleRequestClick(calculation)}>View Calculation Details</Button>
         </Box>
       ))}
       {historyData.meal_plans.map((mealPlan, index) => (
         <Box key={index} sx={{ mb: 2, p: 2, border: '1px solid grey', borderRadius: '4px' }}>
-          <Typography variant="h6">Meal Plan Timestamp: {mealPlan.timestamp}</Typography>
+          <Typography variant="h6">Meal Plan Timestamp: {formatDateToLocalTimezone(mealPlan.timestamp)}</Typography>
           <Button variant="contained" onClick={() => handleRequestClick(mealPlan)}>View Meal Plan Details</Button>
         </Box>
       ))}

@@ -14,7 +14,7 @@ import RequestDetails from './components/HistoryDetails';
 const theme = createTheme({
   palette: {
     primary: {
-      main: '#ff0000',
+      main: '#000080',
     },
     background: {
       default: '#ffffff',

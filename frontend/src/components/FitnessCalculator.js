@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { auth } from '../firebase/firebase'; // Importing auth from your firebase configuration
-import { Container, TextField, Radio, RadioGroup, FormControlLabel, FormLabel, Button, Box, Select, MenuItem, InputLabel, FormControl } from '@mui/material';
+import { Container, TextField, Radio, RadioGroup, FormControlLabel, FormLabel, Button, Box, Select, MenuItem, InputLabel, FormControl, CircularProgress } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 
 const FitnessCalculator = () => {
@@ -18,8 +18,7 @@ const FitnessCalculator = () => {
 
   const navigate = useNavigate();
 
-  const [tdeeData, setTdeeData] = useState(null);
-  const [mealPlanData, setMealPlanData] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const getIdToken = async () => {
     if (auth.currentUser) {
@@ -71,21 +70,33 @@ const FitnessCalculator = () => {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+    setIsLoading(true);
     console.log('Submitting Form');
-    
-    const tdeeResponse = await calculateTDEEAndMacros();
-    const mealPlanResponse = await generateMealPlanAndRecipes();
-  
-    if (tdeeResponse && mealPlanResponse) {
-      setTdeeData(tdeeResponse);
-      setMealPlanData(mealPlanResponse);
-      console.log('Navigating to /results');
-      navigate('/results', { state: { tdeeData: tdeeResponse, mealPlanData: mealPlanResponse } });
-    } else {
-      console.error("Failed to fetch data");
+
+    try {
+      const tdeeResponse = await calculateTDEEAndMacros();
+      const mealPlanResponse = await generateMealPlanAndRecipes();
+
+      if (tdeeResponse && mealPlanResponse) {
+        console.log('Navigating to /results');
+        navigate('/results', { state: { tdeeData: tdeeResponse, mealPlanData: mealPlanResponse } });
+      } else {
+        console.error("Failed to fetch data");
+      }
+    } catch (error) {
+      console.error("An error occurred:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
+  if (isLoading) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
 
   return (
     <Container maxWidth="sm" sx={{ mt: 4 }}>

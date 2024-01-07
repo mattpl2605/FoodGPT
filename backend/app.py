@@ -96,7 +96,7 @@ def write_csv(csv_content, filename):
             writer.writerow(row)
 
 def generate_meal_plan(bmr, tdee, macros, preferences, allergies):
-    openai.api_key = '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'
+    openai.api_key = 'ADD YOUR OWN KEY'
 
     # Prompt engineering
     prompt = (

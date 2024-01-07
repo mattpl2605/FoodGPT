@@ -6,7 +6,6 @@ import { signOut } from 'firebase/auth';
 import { auth } from '../firebase/firebase'; // Adjust the path as needed
 import { useLocation } from 'react-router-dom';
 
-
 function ResponsiveAppBar() {
   const [anchorElNav, setAnchorElNav] = React.useState(null);
   const navigate = useNavigate();
@@ -25,6 +24,14 @@ function ResponsiveAppBar() {
     handleCloseNavMenu();
   };
 
+  const handleLogout = () => {
+    signOut(auth).then(() => {
+      navigate('/');
+    }).catch((error) => {
+      console.error("Error during sign out:", error);
+    });
+  };
+
   const isLoginRoute = location.pathname === '/'; // Check if the current route is the login page
 
   return (
@@ -41,7 +48,7 @@ function ResponsiveAppBar() {
             FoodGPT
           </Typography>
 
-          {!isLoginRoute && ( // Conditional rendering based on the route
+          {!isLoginRoute && (
             <>
               <IconButton
                 size="large"
@@ -74,7 +81,9 @@ function ResponsiveAppBar() {
                 <MenuItem onClick={() => handleNavigate('/history')}>
                   <Typography textAlign="center">History</Typography>
                 </MenuItem>
-                {/* Add other menu items here */}
+                <MenuItem onClick={handleLogout}>
+                  <Typography textAlign="center">Log Out</Typography>
+                </MenuItem>
               </Menu>
             </>
           )}
@@ -83,6 +92,5 @@ function ResponsiveAppBar() {
     </AppBar>
   );
 }
-
 
 export default ResponsiveAppBar;

@@ -19,8 +19,8 @@ const HistoryDetails = () => {
       {isCalculationData ? (
         <>
           {/* Render components for calculation data */}
-          {requestData.Macros && <MacrosPieChart macros={requestData.Macros} />}
           <TDEEContainer data={requestData} />
+          {requestData.Macros && <MacrosPieChart macros={requestData.Macros} />}
         </>
       ) : (
         <>

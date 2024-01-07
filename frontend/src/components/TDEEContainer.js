@@ -8,6 +8,10 @@ const TDEEContainer = ({ data }) => {
     </Container>
   );
 
+  // Format BMR and TDEE to two decimal places
+  const formattedBMR = data.BMR.toFixed(2);
+  const formattedTDEE = data.TDEE.toFixed(2);
+
   return (
     <Container maxWidth="sm" sx={{ mt: 4, mb: 4 }}>
       <Box sx={{
@@ -24,11 +28,11 @@ const TDEEContainer = ({ data }) => {
         </Typography>
         <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
           <Typography variant="body1">BMR:</Typography>
-          <Typography variant="body1">{data.BMR} cal/day</Typography>
+          <Typography variant="body1">{formattedBMR} cal/day</Typography>
         </Box>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
           <Typography variant="body1">TDEE:</Typography>
-          <Typography variant="body1">{data.TDEE} cal/day</Typography>
+          <Typography variant="body1">{formattedTDEE} cal/day</Typography>
         </Box>
       </Box>
     </Container>

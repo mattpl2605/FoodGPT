@@ -1,55 +1,34 @@
-import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
-import axios from 'axios';
-import { auth } from '../firebase/firebase';
+import React from 'react';
+import { useLocation } from 'react-router-dom';
 import TDEEContainer from './TDEEContainer';
 import MacrosPieChart from './MacrosPieChart';
 import MealPlanChart from './MealPlanChart';
 import RecipeComponent from './RecipeComponent';
 
 const HistoryDetails = () => {
-  const { requestId } = useParams();
-  const [requestData, setRequestData] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const location = useLocation();
+  const requestData = location.state?.item; // Retrieve data passed via navigate
 
-  useEffect(() => {
-    const fetchRequestData = async () => {
-      if (!auth.currentUser || !requestId) {
-        setLoading(false);
-        return;
-      }
-
-      try {
-        const idToken = await auth.currentUser.getIdToken();
-        const response = await axios.get(`http://127.0.0.1:5000/history/${requestId}`, {
-          headers: { Authorization: idToken }
-        });
-
-        setRequestData(response.data);
-      } catch (err) {
-        setError('An error occurred while fetching data.');
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchRequestData();
-  }, [requestId]);
-
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div>Error: {error}</div>;
   if (!requestData) return <div>No data available</div>;
 
-  const { tdeeData, mealPlanData } = requestData;
+  // Determine if the data is for calculations or meal plans
+  const isCalculationData = requestData.hasOwnProperty('BMR'); // Adjust based on your data structure
 
   return (
     <div>
-      {tdeeData && <TDEEContainer data={tdeeData} />}
-      {tdeeData?.Macros && <MacrosPieChart macros={tdeeData.Macros} />}
-      {mealPlanData?.meal_plan && <MealPlanChart mealPlanCSV={mealPlanData.meal_plan} />}
-      {mealPlanData?.recipes && <RecipeComponent recipes={mealPlanData.recipes} />}
+      {isCalculationData ? (
+        <>
+          {/* Render components for calculation data */}
+          {requestData.Macros && <MacrosPieChart macros={requestData.Macros} />}
+          <TDEEContainer data={requestData} />
+        </>
+      ) : (
+        <>
+          {/* Render components for meal plan data */}
+          {requestData.meal_plan && <MealPlanChart mealPlanCSV={requestData.meal_plan} />}
+          {requestData.recipes && <RecipeComponent recipes={requestData.recipes} />}
+        </>
+      )}
     </div>
   );
 };

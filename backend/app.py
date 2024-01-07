@@ -182,68 +182,27 @@ def meal_plan_and_recipes():
 
     return jsonify({'meal_plan': meal_plan, 'recipes': recipes})
 
-@app.route('/get-past-calculations', methods=['GET'])
+@app.route('/get-history-details', methods=['GET'])
 @cross_origin(origin='localhost', headers=['Content-Type', 'Authorization'])
-def get_past_calculations():
+def get_history_details():
     try:
         id_token = request.headers.get('Authorization').split('Bearer ')[1]
         decoded_token = auth.verify_id_token(id_token)
         uid = decoded_token['uid']
         calculations_collection = db.collection('users').document(uid).collection('calculations')
         calculations_docs = calculations_collection.stream()
-        past_calculations = [doc.to_dict() for doc in calculations_docs]
-        return jsonify(past_calculations)
-    except Exception as e:
-        logging.exception("Error fetching past calculations")
-        return jsonify({'error': str(e)}), 500
-
-@app.route('/get-past-meal-plans-and-recipes', methods=['GET'])
-@cross_origin(origin='localhost', headers=['Content-Type', 'Authorization'])
-def get_past_meal_plans_and_recipes():
-
-    try:
-        id_token = request.headers.get('Authorization').split('Bearer ')[1]
-        decoded_token = auth.verify_id_token(id_token)
-        uid = decoded_token['uid']
+        calculations_data = [doc.to_dict() for doc in calculations_docs]
         meal_plans_collection = db.collection('users').document(uid).collection('meal_plans')
         meal_plans_docs = meal_plans_collection.stream()
-        past_meal_plans = [doc.to_dict() for doc in meal_plans_docs]
-        return jsonify(past_meal_plans)
-    except Exception as e:
-        logging.exception("Error fetching past meal plans and recipes")
-        return jsonify({'error': str(e)}), 500
-
-
-@app.route('/history/<requestId>', methods=['GET'])
-@cross_origin(origin='localhost', headers=['Content-Type', 'Authorization'])
-def get_history_details(requestId):
-    try:
-        auth_header = request.headers.get('Authorization')
-        if not auth_header or not auth_header.startswith('Bearer '):
-            return jsonify({'error': 'Authorization header missing or malformed'}), 401
-        id_token = auth_header.split('Bearer ')[1]
-        decoded_token = auth.verify_id_token(id_token)
-        uid = decoded_token['uid']
-
-        calculations_doc_ref = db.collection('users').document(uid).collection('calculations').document(requestId)
-        calculations_doc = calculations_doc_ref.get()
-        calculations_data = calculations_doc.to_dict() if calculations_doc.exists else {}
-
-        meal_plans_doc_ref = db.collection('users').document(uid).collection('meal_plans').document(requestId)
-        meal_plans_doc = meal_plans_doc_ref.get()
-        meal_plans_data = meal_plans_doc.to_dict() if meal_plans_doc.exists else {}
-
+        meal_plans_data = [doc.to_dict() for doc in meal_plans_docs]
         history_details = {
             'calculations': calculations_data,
             'meal_plans': meal_plans_data
         }
         return jsonify(history_details)
     except Exception as e:
-        logging.exception("Error fetching history details")
+        logging.exception("Error fetching past calculations")
         return jsonify({'error': str(e)}), 500
-
-
-
 
 
 if __name__ == '__main__':

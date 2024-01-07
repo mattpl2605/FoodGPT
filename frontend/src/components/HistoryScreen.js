@@ -5,43 +5,54 @@ import { auth } from '../firebase/firebase'; // Adjust the path as needed
 import { Box, Typography, Button } from '@mui/material';
 
 const HistoryScreen = () => {
-  const [historyData, setHistoryData] = useState([]);
+  const [historyData, setHistoryData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchHistory = async () => {
+      if (!auth.currentUser) {
+        setLoading(false);
+        return;
+      }
       try {
-        const idToken = await auth.currentUser.getIdToken();
-        const calculationsResponse = await axios.get('http://127.0.0.1:5000/get-past-calculations', {
+        const idToken = await auth.currentUser.getIdToken(true);
+        const response = await axios.get('http://127.0.0.1:5000/get-history-details', {
           headers: { Authorization: `Bearer ${idToken}` }
         });
-        const mealPlansResponse = await axios.get('http://127.0.0.1:5000/get-past-meal-plans-and-recipes', {
-          headers: { Authorization: `Bearer ${idToken}` }
-        });
-
-        // Combine and set data
-        setHistoryData([...calculationsResponse.data, ...mealPlansResponse.data]);
-      } catch (error) {
-        console.error('Error fetching history:', error);
+        setHistoryData(response.data);
+      } catch (err) {
+        setError('Error fetching history data.');
+        console.error(err);
+      } finally {
+        setLoading(false);
       }
     };
 
-    if (auth.currentUser) {
-      fetchHistory();
-    }
+    fetchHistory();
   }, []);
 
-  const handleRequestClick = (id) => {
-    navigate(`/history/${id}`);
+  const handleRequestClick = (item) => {
+    navigate('/history-details', { state: { item } });
   };
+
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>{error}</div>;
+  if (!historyData) return <div>No history data found.</div>;
 
   return (
     <Box sx={{ p: 2 }}>
-      {historyData.length === 0 && <Typography>No history data found.</Typography>}
-      {historyData.map((item, index) => (
+      {historyData.calculations.map((calculation, index) => (
         <Box key={index} sx={{ mb: 2, p: 2, border: '1px solid grey', borderRadius: '4px' }}>
-          <Typography variant="h6">Request Timestamp: {item.timestamp}</Typography>
-          <Button variant="contained" onClick={() => handleRequestClick(item.id)}>View Details</Button>
+          <Typography variant="h6">Calculation Timestamp: {calculation.timestamp}</Typography>
+          <Button variant="contained" onClick={() => handleRequestClick(calculation)}>View Calculation Details</Button>
+        </Box>
+      ))}
+      {historyData.meal_plans.map((mealPlan, index) => (
+        <Box key={index} sx={{ mb: 2, p: 2, border: '1px solid grey', borderRadius: '4px' }}>
+          <Typography variant="h6">Meal Plan Timestamp: {mealPlan.timestamp}</Typography>
+          <Button variant="contained" onClick={() => handleRequestClick(mealPlan)}>View Meal Plan Details</Button>
         </Box>
       ))}
     </Box>

@@ -61,7 +61,7 @@ function App() {
                   <HistoryScreen />
                 </ProtectedRoute>
               } />
-              <Route path="/history/:requestId" element={
+              <Route path="/history-details" element={
                 <ProtectedRoute>
                   <RequestDetails />
                 </ProtectedRoute>

@@ -6,11 +6,19 @@ import openai
 import io
 from firebase_admin import credentials, firestore, auth
 import logging
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+print(os.getenv('OPENAI_API_KEY2'))
+openai.api_key = os.getenv('OPENAI_API_KEY2')
+
 
 app = Flask(__name__)
 CORS(app, supports_credentials=True)
 
-cred = credentials.Certificate('/Users/bilbaothanos14/Documents/GitHub/FoodGPT/backend/foodgpt-20eff-firebase-adminsdk-33q1u-f6dac8684e.json')
+cred = credentials.Certificate('/Users/bilbaothanos14/Downloads/foodgpt-20eff-firebase-adminsdk-33q1u-f6dac8684e.json')
 firebase_admin.initialize_app(cred)
 db = firestore.client()
 
@@ -96,14 +104,13 @@ def write_csv(csv_content, filename):
             writer.writerow(row)
 
 def generate_meal_plan(bmr, tdee, macros, preferences, allergies):
-    openai.api_key = 'ADD YOUR OWN KEY'
 
     # Prompt engineering
     prompt = (
-        f"I want you to act as my personal nutritionist. I will tell you about my dietary preferences, allergies, my basal metabolic rate, total daily energy expenditure, and macro split, and you will suggest a one-week meal plan specifying food of each day for me to try that will cause me to reach my target and satisfy my calories. You should only reply with the meal plan you recommend, including the quantities and the nutritional facts of each meal, and nothing else.\n\n"
+        f"I want you to act as my personal nutritionist. I will tell you about my dietary preferences, allergies, my basal metabolic rate, total daily energy expenditure, and macro split, and you will suggest a one-week meal plan specifying food of each day for me to try that will cause me to reach my target and satisfy my calories. You should only reply with the meal plan you recommend, including the quantities and the nutritional facts of each meal, and nothing else. The total grams of fat, carbs, and protein for all three meals in a day must stay in the limit of the macro split that has been calculated for a day.  \n\n"
         f"The meal plan should be output in the format of a csv. In the table you must output the following columns with the same exact names without any modifications: Day, Meal, Calories, Food, Quantity, Carbs, Fats, Protein. Make sure to provide the meal plan for the whole week and not just one day. Don't return any row with empty values. If a user has a {preferences} or {allergies}, you must give a meal plan with all the food that do not contain the {allergies} and all the food must contain the {preferences} the user has or else it could be a health hazard for the user. \n\n"
         f"Here are some constraints and penalties for this task:\n\n"
-        f"- If the total calories for any day are too high or too low according to the criteria based on the person's input goal then deduct 10 points from your final score.\n"
+        f"- If the total calories for any day are too high or too low according to the criteria based on the person's input goal then deduct 10 points from your final score. The total calories for each day must be in the limit of the {tdee}. The total grams of fat, carbs, and protein for all the meals in a day must stay in the limit of the {macros}. If not, deduct 20 points from your final score. \n"
         f"- If any row has empty values then deduct 5 points from your final score.\n"
         f"- If any column name is modified then deduct 5 points from your final score.\n\n"
         f"Your final score should be as high as possible. My first request is: 'basal metabolic rate: {bmr}; Preferences: {preferences}; Allergies: {allergies}; total daily energy expenditure: {tdee}; Macros: {macros} weight.'")
